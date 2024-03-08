@@ -12,8 +12,27 @@ router.get("/", async (req, res) => {
     
     try {
         //const limit = req.query.limit;
-        const productos = await productManager.getProducts(req.query.page || 1,
-            req.query.limit || 10);
+        const { limit = 10, page = 1, sort, query } = req.query;
+
+        const productos = await productManager.getProducts({
+            limit: parseInt(limit),
+            page: parseInt(page),
+            sort,
+            query
+        });
+
+        res.json({
+            status: 'success',
+            payload: productos,
+            totalPages: productos.totalPages,
+            prevPage: productos.prevPage,
+            nextPage: productos.nextPage,
+            page: productos.page,
+            hasPrevPage: productos.hasPrevPage,
+            hasNextPage: productos.hasNextPage,
+            prevLink: productos.hasPrevPage ? `/api/products?limit=${limit}&page=${productos.prevPage}&sort=${sort}&query=${query}` : null,
+            nextLink: productos.hasNextPage ? `/api/products?limit=${limit}&page=${productos.nextPage}&sort=${sort}&query=${query}` : null,
+        });
 
         
     } catch (error) {
